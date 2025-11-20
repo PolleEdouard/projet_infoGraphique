@@ -17,7 +17,7 @@ lignes à la suite).
 La suite (/5) est :
 • Faire plusieurs tours et les relier par des murs d’enceinte (un château fort quoi !).
 • Travailler sur l’aspect (aspect des murs, éventuellement toit sur certaines tours, etc.).
-Le travail est à faire en binôme.
+Le travail est à faire en binôme ou trimnome dans notre cas.
 Le rendu du travail devra se faire au niveau du devoir qui vous sera proposé (fichiers
 pde).
 A lire attentivement :
