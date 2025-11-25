@@ -116,21 +116,44 @@ void draw() {
   if (mousePressed && mouseButton == RIGHT) {
     decal++;
   }
+   float distance = 50;  // distance du centre (épaisseur de la tour)
+  int nbMurs = 4;
 
+  for (int i = 0; i < nbMurs; i++) {
+    pushMatrix();
+
+    // rotation : un côté du carré = 90° 
+    rotateY(radians(90 * i));
+
+    // on déplace le mur vers l'extérieur pour former la tour
+    translate(0, 50, distance);
+
+    // dessine le mur
+    drawWall();
+
+    popMatrix();
+  }
+}
+
+void drawWall() {
   pushMatrix();
-  rotateY(radians(decal));   
-  translate(- (nbColonnes * brickW) / 2, - (nbLignes * spacingY) / 2, 0);
+  
+  // alignement interne du mur
+  rotateY(radians(decal));
+  translate(-(nbColonnes * brickW) / 2,
+            -(nbLignes   * spacingY) / 2,
+            0);
 
   for (int ligne = 0; ligne < nbLignes; ligne++) {
     pushMatrix();
-    translate(0, ligne * spacingY, 0);  
-    
+    translate(0, ligne * spacingY, 0);
+
     float offset = (ligne % 2 == 0) ? brickW / 2.0 : 0;
     translate(offset, 0, 0);
 
     for (int col = 0; col < nbColonnes; col++) {
       pushMatrix();
-      translate(col * brickW, 0, 0); 
+      translate(col * brickW, 0, 0);
       fill(235, 230, 207);
       box(brickW, brickH, brickD);
       popMatrix();

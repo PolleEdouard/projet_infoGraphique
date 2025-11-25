@@ -1,4 +1,4 @@
-QueasyCam cam;
+/*QueasyCam cam;
 
 void setup() {
   size(800, 600, P3D);
@@ -15,9 +15,7 @@ int spacingY = 80;
 void draw() {
   background(200);
   lights();
-
-  // On centre un peu le tout
-  translate(50, height/2, 0);
+  translate(0,0, 0);
 
   for (int ligne = 0; ligne < nbLignes; ligne++) {
     pushMatrix();
