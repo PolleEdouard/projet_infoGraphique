@@ -25,8 +25,9 @@ void mouseWheel(MouseEvent event) {
 void draw() {
   background(135, 206, 235);
   lights();
-  
+
   float distance = 50;  
+  
   int nbMurs = 4;
 
   for (int i = 0; i < nbMurs; i++) {
