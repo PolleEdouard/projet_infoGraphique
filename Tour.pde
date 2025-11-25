@@ -113,10 +113,11 @@ void draw() {
   background(135, 206, 235);
   lights();
 
-  if (mousePressed && mouseButton == RIGHT) {
+  /*if (mousePressed && mouseButton == RIGHT) {
     decal++;
-  }
-   float distance = 50;  // distance du centre (épaisseur de la tour)
+  }*/
+  
+  float distance = 50;  // distance du centre (épaisseur de la tour)
   int nbMurs = 4;
 
   for (int i = 0; i < nbMurs; i++) {
@@ -126,11 +127,11 @@ void draw() {
     rotateY(radians(90 * i));
 
     // on déplace le mur vers l'extérieur pour former la tour
-    translate(0, 50, distance);
+    translate(2.5, 50, distance);
 
     // dessine le mur
     drawWall();
-
+    
     popMatrix();
   }
 }
