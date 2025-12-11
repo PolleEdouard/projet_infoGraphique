@@ -38,6 +38,7 @@ void draw() {
     translate(2.5, 50, distance);
 
     drawWall();
+    drawCreneaux();
     
     popMatrix();
   }
@@ -85,5 +86,55 @@ void drawSol(){
 
   rectMode(CENTER);
   rect(0, 0, solSize, solSize);         
+  popMatrix();
+}
+
+/*void drawCreneaux() {
+  pushMatrix();
+
+  rotateY(radians(decal));
+  translate(-(nbColonnes * brickW) / 2, 
+            -(nbLignes * spacingY) / 2 - brickH*1.5,  
+            0);
+
+  float step = brickW * 1.5; 
+  for (float x = 0; x < nbColonnes * brickW; x += step) {
+    pushMatrix();
+    translate(x, 0, 0);
+    fill(210, 200, 180);
+    box(brickW, brickH * 2, brickD); 
+    popMatrix();
+  }
+
+  popMatrix();
+}*/
+
+void drawCreneaux() {
+  pushMatrix();
+
+  rotateY(radians(decal));
+  translate(-(nbColonnes * brickW) / 2,
+            -(nbLignes * spacingY) / 2 - brickH, 
+            0);
+
+  float gap = brickW * 0.5;
+  float step = brickW + gap;
+
+  for (float x = 0; x < nbColonnes * brickW; x += step) {
+    pushMatrix();
+    translate(x + brickW/2, 0, 0);
+
+    fill(235, 230, 207);
+
+    // 1re brique
+    box(brickW, brickH, brickD);
+
+    // 2e brique (empilée)
+    translate(0, -brickH, 0);
+    box(brickW, brickH, brickD);
+
+    popMatrix();
+  }
+
   popMatrix();
 }
