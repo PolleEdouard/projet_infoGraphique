@@ -1,11 +1,12 @@
-QueasyCam cam; 
-int nbColonnes = 10;      
-int nbLignes = 38;        
-int brickW = 10;          
-int brickH = 5;           
-int brickD = 5;          
-int spacingY = 5;        
-float decal = 0; 
+QueasyCam cam;
+int decal = 0;
+
+int nbColonnes = 10;
+int nbLignes = 38;
+int brickW = 10;
+int brickH = 5;
+int brickD = 5;
+int spacingY = 5;
 
 void setup() {
   size(1280, 720, P3D);
@@ -17,7 +18,7 @@ void setup() {
 
 void mouseWheel(MouseEvent event) {
   float e = event.getCount();
-  cam.position.z += e * 20;  
+  cam.position.z += e * 20;
 }
 
 void draw() {
@@ -39,109 +40,181 @@ void draw() {
     
     // On dessine les créneaux normalement
     drawCreneaux();
-    
+
     popMatrix();
   }
-  
+
   drawSol();
 }
 
-// MODIFICATION : La fonction prend maintenant un paramètre
 void drawWall(boolean hasDoor) {
   pushMatrix();
-  
+
   rotateY(radians(decal));
   translate(-(nbColonnes * brickW) / 2,
-            -(nbLignes   * spacingY) / 2,
-            0);
+    -(nbLignes   * spacingY) / 2,
+    0);
+
+  // --- REGLAGES ---
+  float fente = 2.5; 
+  int colCible = 4;
 
   // --- PARAMÈTRES DE LA PORTE ---
-  int doorHeightIdx = 12; // Hauteur de la porte en nombre de briques
-  int doorStartCol = 3;   // Colonne où commence la porte
-  int doorWidth = 4;      // Largeur de la porte en briques (doit être pair pour centrer facilement)
+  int doorHeightIdx = 12; 
+  int doorStartCol = 3;   
+  int doorWidth = 4;      
   // ------------------------------
 
   for (int ligne = 0; ligne < nbLignes; ligne++) {
     pushMatrix();
     translate(0, ligne * spacingY, 0);
 
-    // Vérifie si la ligne actuelle a un décalage (offset)
-    boolean isOffsetRow = (ligne % 2 == 0);
+    // --- 1. CONFIGURATION DE LA LIGNE ---
+    boolean isOffsetRow = (ligne % 2 != 0); // Correction : le décalage est sur les lignes impaires
     float offset = isOffsetRow ? brickW / 2.0 : 0;
     translate(offset, 0, 0);
 
-    // Vérifie si nous sommes dans les lignes du bas (zone de la porte)
+    // Zones
     boolean inDoorZoneY = hasDoor && (ligne >= nbLignes - doorHeightIdx);
+    
+    boolean slotBas    = (ligne >= 5  && ligne < 9);
+    boolean slotMilieu = (ligne >= 16 && ligne < 20);
+    boolean slotHaut   = (ligne >= 27 && ligne < 31);
+    boolean isMeurtriere = slotBas || slotMilieu || slotHaut;
 
+    // --- 2. BOUCLE DES COLONNES ---
     for (int col = 0; col < nbColonnes; col++) {
       
-      // Logique pour savoir si on dessine, si on coupe, ou si on saute
-      boolean skipBrick = false;
-      boolean drawHalfRight = false; // Demi-brique à droite de la position actuelle
-      boolean drawHalfLeft = false;  // Demi-brique à gauche (remplace la brique actuelle)
+      // Flags
+      boolean skipBrick = false;      
+      boolean drawHalfRight = false;  
+      boolean drawHalfLeft = false;   
+      boolean brickDrawn = false;     
 
+      // --- LOGIQUE PORTE ---
       if (inDoorZoneY) {
-        // Indices des colonnes de la porte
-        if (col >= doorStartCol && col < doorStartCol + doorWidth) {
-          skipBrick = true; // On ne dessine pas les briques DANS la porte
-        }
-
-        // GESTION DES BORDS DROITS (Demi-briques)
-        // Le décalage crée des trous sur une ligne sur deux.
+        // Ligne PAIRE (non décalée) : On met des demi-briques pour faire le bord net
         if (!isOffsetRow) {
-           // Cas : Ligne SANS offset (les briques sont alignées sur la grille 0, 10, 20...)
-           // Le trou de la porte (30 à 70) crée un vide après la col 2 et avant la col 7
-           
+           if (col >= doorStartCol && col < doorStartCol + doorWidth) {
+             skipBrick = true; 
+           }
+           // Bord GAUCHE de la porte
            if (col == doorStartCol - 1) { 
-             // Juste à GAUCHE de la porte : on ajoute une demi-brique pour combler le trou
              drawHalfRight = true; 
            }
-           
+           // Bord DROIT de la porte
            if (col == doorStartCol + doorWidth) {
-             // Juste à DROITE de la porte : Cette brique dépasse dans la porte, 
-             // on la remplace par une demi-brique décalée pour faire le bord droit.
              skipBrick = true; 
-             drawHalfLeft = true;
+             drawHalfLeft = true; 
            }
         }
-        // Note : Si isOffsetRow est vrai, les briques s'alignent naturellement avec notre porte de largeur 4
-        // (car 4 briques = 40px, et l'offset est de 5px, ça tombe juste sur les bords 30 et 70).
+        // Ligne IMPAIRE (décalée) : Les briques s'alignent naturellement sur le bord
+        else {
+           if (col >= doorStartCol && col < doorStartCol + doorWidth) {
+             skipBrick = true; 
+           }
+        }
       }
 
-      pushMatrix();
-      translate(col * brickW, 0, 0);
-      fill(249, 234, 187);
-
-      // 1. Dessiner la brique normale si on ne doit pas la sauter
-      if (!skipBrick) {
-        box(brickW, brickH, brickD);
+      // Sauter le tour si c'est un trou de porte
+      if (skipBrick && !drawHalfLeft) { 
+          continue; 
       }
 
-      // 2. Dessiner une demi-brique ajoutée à droite (pour combler un trou)
+      // --- DESSIN ---
+      pushMatrix();      
+      // A. CAS : Demi-brique de DROITE (Bord GAUCHE de la porte)
+      // C'est ici qu'était le bug : on doit dessiner la rustine ET la brique normale.
       if (drawHalfRight) {
-        pushMatrix();
-        translate(brickW * 0.75, 0, 0); // Décalage pour centrer la demi-brique dans le vide
-        box(brickW / 2.0, brickH, brickD);
-        popMatrix();
+          // 1. La "rustine" (le petit bout pour combler le trou vers la porte)
+          pushMatrix();
+          translate(col * brickW + brickW * 0.75, 0, 0); 
+          fill(235, 230, 207);
+          box(brickW / 2.0, brickH, brickD);
+          popMatrix();
+          
+          // 2. ET on dessine la brique normale de la colonne (pour ne pas avoir de trou derrière)
+          pushMatrix();
+          translate(col * brickW, 0, 0);
+          fill(235, 230, 207);
+          box(brickW, brickH, brickD);
+          popMatrix();
+
+          brickDrawn = true;
+      }
+      
+      // B. CAS : Demi-brique de GAUCHE (Bord DROIT de la porte)
+      // Ici c'est un remplacement (on coupe ce qui dépasse), donc on ne dessine QUE la demi.
+      else if (drawHalfLeft) {
+          pushMatrix();
+          translate(col * brickW + brickW * 0.25, 0, 0); 
+          fill(235, 230, 207);
+          box(brickW / 2.0, brickH, brickD); 
+          popMatrix();
+          brickDrawn = true;
       }
 
-      // 3. Dessiner une demi-brique de remplacement (pour ne pas dépasser dans la porte)
-      if (drawHalfLeft) {
-         pushMatrix();
-         translate(brickW * 0.25, 0, 0); // Légèrement décalé pour s'aligner au bord de la porte
-         box(brickW / 2.0, brickH, brickD);
-         popMatrix();
+      // C. CAS : MEURTRIÈRES
+      else if (isMeurtriere && !brickDrawn && !inDoorZoneY) {
+          
+          // C1. Ligne Impaire (Décalée)
+          if (isOffsetRow && col == colCible) {
+            float w = (brickW - fente) / 2.0;
+            
+            pushMatrix();
+            translate(col * brickW - (fente/2 + w/2), 0, 0); 
+            fill(235, 230, 207);
+            box(w, brickH, brickD);
+            popMatrix();
+
+            pushMatrix();
+            translate(col * brickW + (fente/2 + w/2), 0, 0);
+            fill(235, 230, 207);
+            box(w, brickH, brickD);
+            popMatrix();
+            
+            brickDrawn = true;
+          }
+
+          // C2. Ligne Paire (Alignée)
+          else if (!isOffsetRow && col == colCible) { // Brique gauche du trou
+            float w = brickW - fente/2.0;
+            pushMatrix(); 
+            translate(col * brickW - fente/4.0, 0, 0);
+            fill(235, 230, 207);
+            box(w, brickH, brickD);
+            popMatrix();
+            brickDrawn = true;
+          }
+          else if (!isOffsetRow && col == colCible + 1) { // Brique droite du trou
+            float w = brickW - fente/2.0;
+            pushMatrix(); 
+            translate(col * brickW + fente/4.0, 0, 0);
+            fill(235, 230, 207);
+            box(w, brickH, brickD);
+            popMatrix();
+            brickDrawn = true;
+          }
       }
 
-      popMatrix();
-    }
-    popMatrix();
-  }
-  popMatrix();
+      // D. CAS STANDARD (Brique normale)
+      if (!brickDrawn) {
+          pushMatrix();
+          translate(col * brickW, 0, 0);
+          fill(235, 230, 207);
+          box(brickW, brickH, brickD);
+          popMatrix();
+      }
+      popMatrix(); // Fin du dessin de la brique courante
+    } // Fin boucle colonnes
+
+    popMatrix(); // Fin ligne
+  } // Fin boucle lignes
+
+  popMatrix(); // Fin mur
 }
 
-// ... RESTE DU CODE (drawSol, drawCreneaux) INCHANGÉ ...
-void drawSol(){
+void drawSol() {
   pushMatrix();
   float solY = (nbLignes * spacingY) / 2 + brickH/2 + 45.5;
   translate(0, solY, 0);
@@ -149,7 +222,7 @@ void drawSol(){
   fill(249, 234, 187);
   float solSize = nbColonnes * brickW + brickW * 0.50;
   rectMode(CENTER);
-  rect(0, 0, solSize, solSize);         
+  rect(0, 0, solSize, solSize);
   popMatrix();
 }
 

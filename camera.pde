@@ -140,12 +140,12 @@ public class QueasyCam {
     target = PVector.add(position, forward);
 
     prevMouse = new Point(mouse.x, mouse.y);
-    if (keys.containsKey('q') && keys.get('q')) velocity.add(PVector.mult(right, speed));
-    if (keys.containsKey('d') && keys.get('d')) velocity.sub(PVector.mult(right, speed));
-    if (keys.containsKey('z') && keys.get('z')) velocity.add(PVector.mult(forward, speed));
-    if (keys.containsKey('s') && keys.get('s')) velocity.sub(PVector.mult(forward, speed));
-    if (keys.containsKey('f') && keys.get('f')) velocity.add(PVector.mult(up, speed));
-    if (keys.containsKey('r') && keys.get('r')) velocity.sub(PVector.mult(up, speed));
+    if (keys.containsKey('k') && keys.get('k')) velocity.add(PVector.mult(right, speed));
+    if (keys.containsKey('m') && keys.get('m')) velocity.sub(PVector.mult(right, speed));
+    if (keys.containsKey('o') && keys.get('o')) velocity.add(PVector.mult(forward, speed));
+    if (keys.containsKey('l') && keys.get('l')) velocity.sub(PVector.mult(forward, speed));
+    if (keys.containsKey('i') && keys.get('i')) velocity.add(PVector.mult(up, speed));
+    if (keys.containsKey('j') && keys.get('j')) velocity.sub(PVector.mult(up, speed));
 
     velocity.mult(friction);
     position.add(velocity);
