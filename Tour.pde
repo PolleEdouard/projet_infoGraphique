@@ -126,10 +126,8 @@ void drawCreneaux() {
 
     fill(235, 230, 207);
 
-    // 1re brique
     box(brickW, brickH, brickD);
 
-    // 2e brique (empilée)
     translate(0, -brickH, 0);
     box(brickW, brickH, brickD);
 
