@@ -129,14 +129,14 @@ void drawWall(boolean hasDoor) {
           // 1. La "rustine" (le petit bout pour combler le trou vers la porte)
           pushMatrix();
           translate(col * brickW + brickW * 0.75, 0, 0); 
-          fill(235, 230, 207);
+          fill(249, 234, 187);
           box(brickW / 2.0, brickH, brickD);
           popMatrix();
           
           // 2. ET on dessine la brique normale de la colonne (pour ne pas avoir de trou derrière)
           pushMatrix();
           translate(col * brickW, 0, 0);
-          fill(235, 230, 207);
+          fill(249, 234, 187);
           box(brickW, brickH, brickD);
           popMatrix();
 
@@ -148,7 +148,7 @@ void drawWall(boolean hasDoor) {
       else if (drawHalfLeft) {
           pushMatrix();
           translate(col * brickW + brickW * 0.25, 0, 0); 
-          fill(235, 230, 207);
+          fill(249, 234, 187);
           box(brickW / 2.0, brickH, brickD); 
           popMatrix();
           brickDrawn = true;
@@ -163,13 +163,13 @@ void drawWall(boolean hasDoor) {
             
             pushMatrix();
             translate(col * brickW - (fente/2 + w/2), 0, 0); 
-            fill(235, 230, 207);
+            fill(249, 234, 187);
             box(w, brickH, brickD);
             popMatrix();
 
             pushMatrix();
             translate(col * brickW + (fente/2 + w/2), 0, 0);
-            fill(235, 230, 207);
+            fill(249, 234, 187);
             box(w, brickH, brickD);
             popMatrix();
             
@@ -181,7 +181,7 @@ void drawWall(boolean hasDoor) {
             float w = brickW - fente/2.0;
             pushMatrix(); 
             translate(col * brickW - fente/4.0, 0, 0);
-            fill(235, 230, 207);
+            fill(249, 234, 187);
             box(w, brickH, brickD);
             popMatrix();
             brickDrawn = true;
@@ -190,7 +190,7 @@ void drawWall(boolean hasDoor) {
             float w = brickW - fente/2.0;
             pushMatrix(); 
             translate(col * brickW + fente/4.0, 0, 0);
-            fill(235, 230, 207);
+            fill(249, 234, 187);
             box(w, brickH, brickD);
             popMatrix();
             brickDrawn = true;
@@ -201,7 +201,7 @@ void drawWall(boolean hasDoor) {
       if (!brickDrawn) {
           pushMatrix();
           translate(col * brickW, 0, 0);
-          fill(235, 230, 207);
+          fill(249, 234, 187);
           box(brickW, brickH, brickD);
           popMatrix();
       }
