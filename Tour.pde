@@ -64,7 +64,7 @@ void drawWall() {
     for (int col = 0; col < nbColonnes; col++) {
       pushMatrix();
       translate(col * brickW, 0, 0);
-      fill(235, 230, 207);
+      fill(249, 234, 187);
       box(brickW, brickH, brickD);
       popMatrix();
     }
@@ -80,7 +80,7 @@ void drawSol(){
 
   rotateX(HALF_PI);
 
-  fill(235, 230, 207);
+  fill(249, 234, 187);
 
   float solSize = nbColonnes * brickW + brickW * 0.50;
 
@@ -124,7 +124,7 @@ void drawCreneaux() {
     pushMatrix();
     translate(x + brickW/2, 0, 0);
 
-    fill(235, 230, 207);
+    fill(249, 234, 187);
 
     box(brickW, brickH, brickD);
 
