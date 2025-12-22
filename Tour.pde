@@ -31,21 +31,23 @@ void setup() {
   // Paramètres : x, z, nbColonnes, nbLignes
   int ecart = 250; 
   
-  lesTours.add(new Tour(-ecart, -ecart)); // Arrière Gauche
-  lesTours.add(new Tour(ecart, -ecart));  // Arrière Droite
-  lesTours.add(new Tour(ecart, ecart));   // Avant Droite
-  lesTours.add(new Tour(-ecart, ecart));  // Avant Gauche
+  lesTours.add(new Tour(-ecart, -ecart,10,38)); // Arrière Gauche
+  lesTours.add(new Tour(ecart, -ecart,10,38));  // Arrière Droite
+  lesTours.add(new Tour(ecart, ecart,10,38));   // Avant Droite
+  lesTours.add(new Tour(-ecart, ecart,10,38));  // Avant Gauche
   
   int longueurMurPixels = (ecart * 2) - 130; 
+  // Mur Nord
+  lesMurs.add(new Mur(0, -ecart, longueurMurPixels, 0, false)); 
   
-  // Mur Nord (Z = -ecart)
-  lesMurs.add(new Mur(0, -ecart, longueurMurPixels, 0)); 
-  // Mur Sud (Z = ecart)
-  lesMurs.add(new Mur(0, ecart, longueurMurPixels, 180)); 
-  // Mur Est (X = ecart)
-  lesMurs.add(new Mur(ecart, 0, longueurMurPixels, 90)); 
-  // Mur Ouest (X = -ecart)
-  lesMurs.add(new Mur(-ecart, 0, longueurMurPixels, -90)); 
+  // Mur Sud le mur avec la porte
+  lesMurs.add(new Mur(0, ecart, longueurMurPixels, 180, true)); 
+  
+  // Mur Est 
+  lesMurs.add(new Mur(ecart, 0, longueurMurPixels, 90, false)); 
+  
+  // Mur Ouest 
+  lesMurs.add(new Mur(-ecart, 0, longueurMurPixels, -90, false));
 
 }
 
@@ -69,21 +71,28 @@ void draw() {
 class Mur {
   float x, z, angle;
   float longueurPixels;
+  boolean hasGate;
   
   int nbColonnes; 
-  int nbLignes = 38; 
+  int nbLignes = 34; 
   
   int brickW = 10;
   int brickH = 5;
   int brickD = 5;
   int spacingY = 5;
   
-  Mur(float x, float z, float longueurPx, float angleDeg) {
+  // paramètre porte
+  int gateHeightRows = 18; 
+  int gateWidthCols = 8;   
+  int gateStartCol;
+  Mur(float x, float z, float longueurPx, float angleDeg,boolean aUnPortail) {
     this.x = x;
     this.z = z;
     this.longueurPixels = longueurPx;
     this.angle = radians(angleDeg);
+    this.hasGate = aUnPortail;
     this.nbColonnes = (int)(longueurPixels / brickW);
+    this.gateStartCol = (nbColonnes - gateWidthCols) / 2;
   }
   
   void display() {
@@ -91,14 +100,11 @@ class Mur {
     translate(x, 0, z);
     rotateY(angle);
     
-    // <--- MODIFIÉ : Calcul pour coller le mur au sol
-    // Si on réduit la hauteur, le mur a tendance à flotter ou s'enfoncer.
-    // On le descend de 40px pour compenser la différence avec les tours.
-    float ajustementHauteur = 50; 
+    // On le descend de 50px pour compenser la différence avec les tours.
+    float ajustementHauteur = 60; 
     
     translate(-(nbColonnes * brickW) / 2, -(nbLignes * spacingY) / 2 + ajustementHauteur, 0);
     
-    // --- DESSIN DES BRIQUES ---
     for (int ligne = 0; ligne < nbLignes; ligne++) {
       pushMatrix();
       translate(0, ligne * spacingY, 0);
@@ -107,33 +113,101 @@ class Mur {
       float offset = isOffsetRow ? brickW / 2.0 : 0;
       translate(offset, 0, 0);
       
+      // Zone du portail
+      boolean inGateZoneY = hasGate && (ligne >= nbLignes - gateHeightRows);
+      
       for (int col = 0; col < nbColonnes; col++) {
-        if (isOffsetRow && col == nbColonnes - 1) continue; 
         
+        
+        boolean skipBrick = false;        
+        boolean drawHalfRight = false;  
+        boolean drawHalfLeft = false;    
+        boolean brickDrawn = false;  
+        
+        // Gestion de la porte du mur
+        if (inGateZoneY) {
+          // Ligne PAIRE (non décalée) : On gère les bords nets
+          if (!isOffsetRow) {
+
+             if (col >= gateStartCol && col < gateStartCol + gateWidthCols) {
+               skipBrick = true; 
+             }
+             // Bord GAUCHE (demi-brique droite)
+             if (col == gateStartCol - 1) { 
+               drawHalfRight = true; 
+             }
+             // Bord DROIT (demi-brique gauche)
+             if (col == gateStartCol + gateWidthCols) {
+               skipBrick = true; 
+               drawHalfLeft = true; 
+             }
+          }
+          else {
+             if (col >= gateStartCol && col < gateStartCol + gateWidthCols) {
+               skipBrick = true; 
+             }
+          }
+        }
+
+       if (skipBrick && !drawHalfLeft) { continue; }
+
         pushMatrix();
-        translate(col * brickW, 0, 0);
-        fill(249, 234, 187);
-        box(brickW, brickH, brickD);
-        popMatrix();
+        
+        // A. Demi-brique pour bord GAUCHE de la porte
+        if (drawHalfRight) {
+           pushMatrix(); translate(col * brickW + brickW * 0.75, 0, 0); 
+           fill(249, 234, 187); box(brickW / 2.0, brickH, brickD); popMatrix();
+           pushMatrix(); translate(col * brickW, 0, 0);
+           fill(249, 234, 187); box(brickW, brickH, brickD); popMatrix();
+           brickDrawn = true;
+        }
+        // B. Demi-brique pour bord DROIT de la porte
+        else if (drawHalfLeft) {
+           pushMatrix(); translate(col * brickW + brickW * 0.25, 0, 0); 
+           fill(249, 234, 187); box(brickW / 2.0, brickH, brickD); popMatrix();
+           brickDrawn = true;
+        }
+        // C. Brique standard
+        if (!brickDrawn) {
+           pushMatrix();
+           translate(col * brickW, 0, 0);
+           fill(249, 234, 187);
+           box(brickW, brickH, brickD);
+           popMatrix();
+        }
+        popMatrix(); 
       }
       popMatrix();
     }
     
+    
+    if (hasGate) {
+      pushMatrix();
+      float gateCenterX = (gateStartCol * brickW) + (gateWidthCols * brickW / 2.0);
+      float gateCenterY = (nbLignes * spacingY) - (gateHeightRows * spacingY / 2.0) - (brickH/2.0);
+      translate(gateCenterX, gateCenterY, -2); 
+      fill(101, 67, 33); 
+      box(gateWidthCols * brickW, gateHeightRows * spacingY, 2);
+      popMatrix();
+    }
+
     drawCreneaux();
+    
     
     popMatrix();
   }
   
   void drawCreneaux() {
     pushMatrix();
-    translate(0, -brickH, 0); 
+    translate(0, -brickH*2, 0); 
     float gap = brickW * 0.5;
     float step = brickW + gap;
-    
     for (float cx = 0; cx < nbColonnes * brickW - brickW; cx += step) {
       pushMatrix();
       translate(cx + brickW/2, 0, 0);
       fill(249, 234, 187);
+      box(brickW, brickH, brickD);
+      translate(0, brickH, 0);
       box(brickW, brickH, brickD);
       popMatrix();
     }
@@ -146,17 +220,28 @@ class Tour {
   
   // Les variables globales de la tour
   int decal = 0;
-  int nbColonnes = 10;
-  int nbLignes = 38;
+  int nbColonnes; // Suppression de la valeur par défaut ici car définie dans le constructeur
+  int nbLignes;   // Suppression de la valeur par défaut ici car définie dans le constructeur
   int brickW = 10;
   int brickH = 5;
   int brickD = 5;
   int spacingY = 5;
+
+  // Gestions des meutrières (nettoyage: déplacé ici)
+  float fente = 2.5; 
+  int colCible = 4;
+
+  // Paramètre de la porte (nettoyage: déplacé ici)
+  int doorHeightIdx = 12; 
+  int doorStartCol = 3;   
+  int doorWidth = 4; 
   
   // Constructeur
-  Tour(float x, float z) {
+  Tour(float x, float z, int cols, int rows) {
     this.x = x;
     this.z = z;
+    this.nbColonnes = cols; 
+    this.nbLignes = rows;   
   }
 
   void display() {
@@ -197,14 +282,7 @@ class Tour {
       -(nbLignes    * spacingY) / 2,
       0);
 
-    // Gestions des meutrières
-    float fente = 2.5; 
-    int colCible = 4;
-
-    // Paramètre de la porte
-    int doorHeightIdx = 12; 
-    int doorStartCol = 3;   
-    int doorWidth = 4;      
+    // Les variables ont été déplacées en haut de la classe pour le nettoyage
 
     for (int ligne = 0; ligne < nbLignes; ligne++) {
       pushMatrix();
